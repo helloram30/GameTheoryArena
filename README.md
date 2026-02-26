@@ -85,6 +85,29 @@ Then open `http://localhost:5173`.
 - View leaderboard ranked by win rate
 - Replay each match round-by-round with move reveal (`Peace`/`Hit`)
 
+## Strategy Glossary
+
+- `AlwaysCooperate`: always chooses Peace (`COOPERATE`).
+- `AlwaysDefect`: always chooses Hit (`DEFECT`).
+- `Random`: randomly chooses Peace or Hit each round.
+- `TitForTat`: starts with Peace, then copies opponent's previous move.
+- `GrimTrigger`: starts with Peace, but if opponent ever hits once, it hits forever.
+- `WinStayLoseShift`: repeats previous move after good outcome, switches after bad outcome.
+- `TitForTwoTats`: defects only after opponent defects in two consecutive rounds.
+- `GenerousTitForTat`: like TitForTat, but sometimes forgives a defection.
+- `Prober`: tests opponent with early defections, then adapts behavior from the response.
+- `SuspiciousTitForTat`: TitForTat variant that starts with Hit first.
+- `ContriteTitForTat`: TitForTat variant that tries to recover cooperation after accidental conflict.
+- `AdaptiveThreshold`: adapts by switching behavior based on opponent defection level.
+- `RegretMinimizer`: adapts over time to reduce long-run regret from prior choices.
+
+## Rounds vs Seed
+
+- `rounds` (example: `200`) means how many turns are played in each match.
+- `seed` is a random-number initializer for reproducibility.
+- Same `seed` + same strategies + same rounds => same stochastic outcomes (useful for repeatable experiments).
+- If `seed` is omitted, randomness changes per run.
+
 ## Add a New Theory (Strategy)
 
 To add a new theory, create a new strategy class and register it.

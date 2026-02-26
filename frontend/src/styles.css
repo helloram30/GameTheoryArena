@@ -1,0 +1,170 @@
+:root {
+  --bg: #f4f1ea;
+  --panel: #fffdf8;
+  --ink: #122023;
+  --muted: #55676d;
+  --line: #d9cec0;
+  --accent: #b5401f;
+  --accent-dark: #8f2f16;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 20% 10%, #fff5df 0%, var(--bg) 40%),
+    linear-gradient(120deg, #f7ede3 0%, #efe8de 45%, #ece9e1 100%);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app {
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+  padding: 40px 0 48px;
+}
+
+header {
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 0;
+}
+
+h1 {
+  margin: 8px 0 8px;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1;
+}
+
+h2 {
+  margin: 0 0 14px;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 1.3rem;
+}
+
+p {
+  margin: 0;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 16px;
+  box-shadow: 0 10px 24px rgba(20, 26, 33, 0.08);
+}
+
+.controlGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+input,
+select,
+button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:hover:enabled {
+  background: var(--accent-dark);
+}
+
+.meta {
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+.error {
+  margin-top: 12px;
+  color: #8b1d1d;
+  font-weight: 600;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.replayControls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 420px;
+}
+
+.matchSummary {
+  margin-top: 14px;
+  margin-bottom: 10px;
+}
+
+.replayTable {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+@media (max-width: 800px) {
+  .controlGrid {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    min-width: 520px;
+  }
+}

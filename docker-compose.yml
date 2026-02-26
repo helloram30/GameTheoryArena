@@ -1,0 +1,18 @@
+services:
+  backend:
+    build:
+      context: ./backend/arena
+      dockerfile: Dockerfile
+    container_name: gta-backend
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gta-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"

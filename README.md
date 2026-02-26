@@ -33,6 +33,18 @@ npm run dev
 
 Frontend runs at `http://localhost:5173`.
 
+## Run With Docker
+
+```bash
+docker compose up --build
+```
+
+Then open `http://localhost:5173`.
+
+- Frontend container serves the React app through Nginx.
+- `/api/*` requests are proxied to the backend container.
+- Backend is also exposed directly on `http://localhost:8080`.
+
 ## API Endpoints
 
 - `GET /api/strategies`
@@ -72,6 +84,44 @@ Frontend runs at `http://localhost:5173`.
 - Run round-robin tournaments with configurable rounds and optional seed
 - View leaderboard ranked by win rate
 - Replay each match round-by-round with move reveal (`Peace`/`Hit`)
+
+## Add a New Theory (Strategy)
+
+To add a new theory, create a new strategy class and register it.
+
+1. Create a new class in `backend/arena/src/main/java/com/gametheoryarena/arena/strategy`.
+2. Implement the `Strategy` interface:
+   - `name()` should return the display name.
+   - `nextMove(myHistory, opponentHistory)` should return `Move.COOPERATE` or `Move.DEFECT`.
+3. Register it in `StrategyRegistry` by adding a factory entry in the constructor map.
+4. Restart backend (or rebuild Docker images) and call `GET /api/strategies` to confirm it appears.
+
+Minimal example:
+
+```java
+package com.gametheoryarena.arena.strategy;
+
+import java.util.List;
+
+import com.gametheoryarena.arena.model.Move;
+
+public class PavlovLite implements Strategy {
+    @Override
+    public String name() {
+        return "PavlovLite";
+    }
+
+    @Override
+    public Move nextMove(List<Move> myHistory, List<Move> opponentHistory) {
+        if (myHistory.isEmpty()) {
+            return Move.COOPERATE;
+        }
+        Move myLast = myHistory.get(myHistory.size() - 1);
+        Move opponentLast = opponentHistory.get(opponentHistory.size() - 1);
+        return myLast == opponentLast ? Move.COOPERATE : Move.DEFECT;
+    }
+}
+```
 
 ## Notes
 

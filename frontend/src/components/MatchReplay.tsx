@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { MatchResult } from '../types';
+import StrategyName from './StrategyName';
 
 interface MatchReplayProps {
   matches: MatchResult[];
@@ -52,8 +53,10 @@ export default function MatchReplay({ matches }: MatchReplayProps) {
       </div>
 
       <p className="matchSummary">
-        Winner: <strong>{winner(selectedMatch)}</strong> | Score: {selectedMatch.playerOneStrategy} {selectedMatch.playerOneTotal} - {selectedMatch.playerTwoTotal}{' '}
-        {selectedMatch.playerTwoStrategy}
+        Winner:{' '}
+        <strong>{winner(selectedMatch) === 'Draw' ? 'Draw' : <StrategyName name={winner(selectedMatch)} />}</strong> |
+        Score: <StrategyName name={selectedMatch.playerOneStrategy} /> {selectedMatch.playerOneTotal} -{' '}
+        {selectedMatch.playerTwoTotal} <StrategyName name={selectedMatch.playerTwoStrategy} />
       </p>
 
       <div className="tableWrap replayTable">
@@ -61,8 +64,12 @@ export default function MatchReplay({ matches }: MatchReplayProps) {
           <thead>
             <tr>
               <th>Round</th>
-              <th>{selectedMatch.playerOneStrategy}</th>
-              <th>{selectedMatch.playerTwoStrategy}</th>
+              <th>
+                <StrategyName name={selectedMatch.playerOneStrategy} />
+              </th>
+              <th>
+                <StrategyName name={selectedMatch.playerTwoStrategy} />
+              </th>
               <th>Round Score</th>
             </tr>
           </thead>

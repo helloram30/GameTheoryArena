@@ -7,7 +7,8 @@ public record Standing(
         int draws,
         int losses,
         double winRate,
-        int totalPoints,
+        double totalPoints,
+        double averageScorePerRound,
         int pointDifferential
 ) {
 }

@@ -59,7 +59,7 @@ public class MatchService {
         Random baseRandom = seed == null ? new Random() : new Random(seed);
 
         for (int i = 0; i < strategies.size(); i++) {
-            for (int j = i + 1; j < strategies.size(); j++) {
+            for (int j = i; j < strategies.size(); j++) {
                 String strategyOneName = strategies.get(i);
                 String strategyTwoName = strategies.get(j);
 
@@ -70,22 +70,32 @@ public class MatchService {
 
                 MutableStanding one = standingMap.get(strategyOneName);
                 MutableStanding two = standingMap.get(strategyTwoName);
-                one.matchesPlayed++;
-                two.matchesPlayed++;
-                one.totalPoints += result.playerOneTotal();
-                two.totalPoints += result.playerTwoTotal();
-                one.pointDifferential += result.playerOneTotal() - result.playerTwoTotal();
-                two.pointDifferential += result.playerTwoTotal() - result.playerOneTotal();
-
-                if (result.playerOneTotal() > result.playerTwoTotal()) {
-                    one.wins++;
-                    two.losses++;
-                } else if (result.playerTwoTotal() > result.playerOneTotal()) {
-                    two.wins++;
-                    one.losses++;
-                } else {
+                if (i == j) {
+                    // For self-play, treat the strategy's score as the mean of both instances.
+                    one.matchesPlayed++;
+                    one.totalPoints += (result.playerOneTotal() + result.playerTwoTotal()) / 2.0;
+                    one.totalRounds += rounds;
                     one.draws++;
-                    two.draws++;
+                } else {
+                    one.matchesPlayed++;
+                    two.matchesPlayed++;
+                    one.totalPoints += result.playerOneTotal();
+                    two.totalPoints += result.playerTwoTotal();
+                    one.totalRounds += rounds;
+                    two.totalRounds += rounds;
+                    one.pointDifferential += result.playerOneTotal() - result.playerTwoTotal();
+                    two.pointDifferential += result.playerTwoTotal() - result.playerOneTotal();
+
+                    if (result.playerOneTotal() > result.playerTwoTotal()) {
+                        one.wins++;
+                        two.losses++;
+                    } else if (result.playerTwoTotal() > result.playerOneTotal()) {
+                        two.wins++;
+                        one.losses++;
+                    } else {
+                        one.draws++;
+                        two.draws++;
+                    }
                 }
             }
         }
@@ -93,15 +103,15 @@ public class MatchService {
         List<Standing> standings = standingMap.entrySet().stream()
                 .map(entry -> toStanding(entry.getKey(), entry.getValue()))
                 .sorted((left, right) -> {
-                    int compareWinRate = Double.compare(right.winRate(), left.winRate());
-                    if (compareWinRate != 0) {
-                        return compareWinRate;
+                    int compareAvgScore = Double.compare(right.averageScorePerRound(), left.averageScorePerRound());
+                    if (compareAvgScore != 0) {
+                        return compareAvgScore;
                     }
                     int comparePointDiff = Integer.compare(right.pointDifferential(), left.pointDifferential());
                     if (comparePointDiff != 0) {
                         return comparePointDiff;
                     }
-                    int compareTotalPoints = Integer.compare(right.totalPoints(), left.totalPoints());
+                    int compareTotalPoints = Double.compare(right.totalPoints(), left.totalPoints());
                     if (compareTotalPoints != 0) {
                         return compareTotalPoints;
                     }
@@ -116,6 +126,9 @@ public class MatchService {
         double winRate = standing.matchesPlayed == 0
                 ? 0.0
                 : (standing.wins + (standing.draws * 0.5)) / standing.matchesPlayed;
+        double averageScorePerRound = standing.totalRounds == 0
+                ? 0.0
+                : standing.totalPoints / standing.totalRounds;
         return new Standing(
                 strategy,
                 standing.matchesPlayed,
@@ -124,6 +137,7 @@ public class MatchService {
                 standing.losses,
                 winRate,
                 standing.totalPoints,
+                averageScorePerRound,
                 standing.pointDifferential);
     }
 
@@ -132,7 +146,8 @@ public class MatchService {
         private int wins;
         private int draws;
         private int losses;
-        private int totalPoints;
+        private double totalPoints;
+        private int totalRounds;
         private int pointDifferential;
     }
 }

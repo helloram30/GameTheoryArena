@@ -24,6 +24,7 @@ export interface Standing {
   losses: number;
   winRate: number;
   totalPoints: number;
+  averageScorePerRound: number;
   pointDifferential: number;
 }
 

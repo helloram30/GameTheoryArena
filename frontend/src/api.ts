@@ -1,4 +1,4 @@
-import type { TournamentResult } from './types';
+import type { CustomStrategyRequest, TournamentResult } from './types';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
 
@@ -10,13 +10,17 @@ export async function fetchStrategies(): Promise<string[]> {
   return response.json();
 }
 
-export async function runTournament(rounds: number, seed?: number): Promise<TournamentResult> {
+export async function runTournament(
+  rounds: number,
+  seed?: number,
+  customStrategies?: CustomStrategyRequest[]
+): Promise<TournamentResult> {
   const response = await fetch(`${BASE_URL}/tournament`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ rounds, seed })
+    body: JSON.stringify({ rounds, seed, customStrategies })
   });
 
   if (!response.ok) {

@@ -33,3 +33,18 @@ export interface TournamentResult {
   standings: Standing[];
   matches: MatchResult[];
 }
+
+export type FirstMove = 'COOPERATE' | 'DEFECT';
+export type ResponseMode =
+  | 'MIRROR_LAST'
+  | 'DEFECT_AFTER_ONE'
+  | 'DEFECT_AFTER_TWO'
+  | 'ALWAYS_COOPERATE'
+  | 'ALWAYS_DEFECT';
+
+export interface CustomStrategyRequest {
+  name: string;
+  firstMove: FirstMove;
+  responseMode: ResponseMode;
+  forgivenessProbability: number;
+}

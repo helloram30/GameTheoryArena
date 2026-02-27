@@ -30,7 +30,11 @@ public class TournamentController {
     @PostMapping("/tournament")
     public TournamentResult play(@Valid @RequestBody TournamentRequest request) {
         try {
-            return matchService.playTournament(request.strategies(), request.rounds(), request.seed());
+            return matchService.playTournament(
+                    request.strategies(),
+                    request.rounds(),
+                    request.seed(),
+                    request.customStrategies());
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
         }

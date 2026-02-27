@@ -98,6 +98,31 @@ p {
   height: fit-content;
 }
 
+.customBuilder {
+  margin-top: 14px;
+  border-top: 1px dashed var(--line);
+  padding-top: 12px;
+}
+
+.customBuilder h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.builderGrid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
 label {
   font-size: 0.9rem;
   font-weight: 600;
@@ -245,6 +270,10 @@ th {
 
   .controlActions button {
     width: 100%;
+  }
+
+  .builderGrid {
+    grid-template-columns: 1fr;
   }
 
   table {

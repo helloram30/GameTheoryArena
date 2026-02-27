@@ -1,8 +1,10 @@
 package com.gametheoryarena.arena.service;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +15,9 @@ import com.gametheoryarena.arena.model.Standing;
 import com.gametheoryarena.arena.model.TournamentResult;
 import com.gametheoryarena.arena.strategy.Strategy;
 import com.gametheoryarena.arena.strategy.StrategyRegistry;
+import com.gametheoryarena.arena.strategy.RuleBasedStrategy;
+import com.gametheoryarena.arena.model.Move;
+import com.gametheoryarena.arena.web.CustomStrategyRequest;
 
 @Service
 public class MatchService {
@@ -38,17 +43,28 @@ public class MatchService {
     }
 
     public TournamentResult playTournament(List<String> requestedStrategies, int rounds, Long seed) {
+        return playTournament(requestedStrategies, rounds, seed, null);
+    }
+
+    public TournamentResult playTournament(
+            List<String> requestedStrategies,
+            int rounds,
+            Long seed,
+            List<CustomStrategyRequest> customStrategies) {
         if (rounds < 1) {
             throw new IllegalArgumentException("Rounds must be >= 1");
         }
+
+        Map<String, Function<Random, Strategy>> factories = buildTournamentFactories(customStrategies);
+
         List<String> strategies = requestedStrategies == null || requestedStrategies.isEmpty()
-                ? strategyRegistry.availableStrategies()
+                ? factories.keySet().stream().sorted().toList()
                 : requestedStrategies.stream().distinct().toList();
         if (strategies.size() < 2) {
             throw new IllegalArgumentException("Tournament requires at least 2 strategies");
         }
         strategies.forEach(name -> {
-            if (!strategyRegistry.hasStrategy(name)) {
+            if (!factories.containsKey(name)) {
                 throw new IllegalArgumentException("Unknown strategy: " + name);
             }
         });
@@ -63,8 +79,8 @@ public class MatchService {
                 String strategyOneName = strategies.get(i);
                 String strategyTwoName = strategies.get(j);
 
-                Strategy playerOne = strategyRegistry.create(strategyOneName, new Random(baseRandom.nextLong()));
-                Strategy playerTwo = strategyRegistry.create(strategyTwoName, new Random(baseRandom.nextLong()));
+                Strategy playerOne = factories.get(strategyOneName).apply(new Random(baseRandom.nextLong()));
+                Strategy playerTwo = factories.get(strategyTwoName).apply(new Random(baseRandom.nextLong()));
                 MatchResult result = matchEngine.play(playerOne, playerTwo, rounds);
                 matches.add(result);
 
@@ -120,6 +136,36 @@ public class MatchService {
                 .toList();
 
         return new TournamentResult(rounds, standings, matches);
+    }
+
+    private Map<String, Function<Random, Strategy>> buildTournamentFactories(List<CustomStrategyRequest> customStrategies) {
+        Map<String, Function<Random, Strategy>> factories = new LinkedHashMap<>();
+        for (String builtInName : strategyRegistry.availableStrategies()) {
+            factories.put(builtInName, random -> strategyRegistry.create(builtInName, random));
+        }
+        if (customStrategies == null || customStrategies.isEmpty()) {
+            return factories;
+        }
+
+        for (CustomStrategyRequest customStrategy : customStrategies) {
+            String name = customStrategy.name() == null ? "" : customStrategy.name().trim();
+            if (name.isEmpty()) {
+                throw new IllegalArgumentException("Custom strategy name cannot be blank");
+            }
+            if (factories.containsKey(name)) {
+                throw new IllegalArgumentException("Custom strategy name already exists: " + name);
+            }
+            Move firstMove = customStrategy.firstMove() == CustomStrategyRequest.FirstMove.DEFECT
+                    ? Move.DEFECT
+                    : Move.COOPERATE;
+            factories.put(name, random -> new RuleBasedStrategy(
+                    name,
+                    firstMove,
+                    customStrategy.responseMode(),
+                    customStrategy.forgivenessProbability(),
+                    random));
+        }
+        return factories;
     }
 
     private Standing toStanding(String strategy, MutableStanding standing) {

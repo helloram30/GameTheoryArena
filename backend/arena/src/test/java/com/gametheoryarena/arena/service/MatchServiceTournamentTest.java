@@ -1,6 +1,7 @@
 package com.gametheoryarena.arena.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.gametheoryarena.arena.model.Standing;
 import com.gametheoryarena.arena.model.TournamentResult;
 import com.gametheoryarena.arena.strategy.StrategyRegistry;
+import com.gametheoryarena.arena.web.CustomStrategyRequest;
 
 class MatchServiceTournamentTest {
 
@@ -36,5 +38,32 @@ class MatchServiceTournamentTest {
         for (int i = 1; i < standings.size(); i++) {
             assertTrue(standings.get(i - 1).averageScorePerRound() >= standings.get(i).averageScorePerRound());
         }
+    }
+
+    @Test
+    void includesCustomStrategyInTournament() {
+        List<CustomStrategyRequest> customStrategies = List.of(new CustomStrategyRequest(
+                "MyRuleBot",
+                CustomStrategyRequest.FirstMove.COOPERATE,
+                CustomStrategyRequest.ResponseMode.MIRROR_LAST,
+                0.0));
+
+        TournamentResult result = matchService.playTournament(null, 100, 42L, customStrategies);
+
+        assertTrue(result.standings().stream().anyMatch(standing -> standing.strategy().equals("MyRuleBot")));
+    }
+
+    @Test
+    void rejectsCustomStrategyNameConflict() {
+        List<CustomStrategyRequest> customStrategies = List.of(new CustomStrategyRequest(
+                "TitForTat",
+                CustomStrategyRequest.FirstMove.COOPERATE,
+                CustomStrategyRequest.ResponseMode.MIRROR_LAST,
+                0.0));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> matchService.playTournament(null, 100, 42L, customStrategies));
+        assertTrue(ex.getMessage().contains("already exists"));
     }
 }

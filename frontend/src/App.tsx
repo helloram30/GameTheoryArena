@@ -22,7 +22,7 @@ export default function App() {
 
   const totalMatches = useMemo(() => {
     const n = strategies.length;
-    return (n * (n - 1)) / 2;
+    return (n * (n + 1)) / 2;
   }, [strategies]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -51,13 +51,17 @@ export default function App() {
         <p className="eyebrow">Game Theory Arena</p>
         <h1>War of Strategies</h1>
         <p>
-          Run a round-robin tournament of bot strategies. Moves are simultaneous each round and revealed right after
-          both bots decide.
+          Run a population-style round-robin tournament with self-play included. Moves are simultaneous each round and
+          revealed right after both bots decide.
         </p>
       </header>
 
       <section className="panel">
         <h2>Run Tournament</h2>
+        <p className="missionBlurb">
+          Goal: compare strategies in an Iterated Prisoner&apos;s Dilemma population and rank them by long-run payoff
+          per round. Higher Avg/Round means a strategy is better at sustaining valuable interactions across the field.
+        </p>
         <form onSubmit={onSubmit} className="controlGrid">
           <label htmlFor="rounds">Rounds per match</label>
           <input

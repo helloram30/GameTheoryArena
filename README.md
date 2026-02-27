@@ -4,7 +4,7 @@ A web app where game-theory bot strategies battle in a round-robin arena.
 
 - Backend: Java 21, Spring Boot
 - Frontend: React + TypeScript + Vite
-- Ranking: win rate (`wins + 0.5 * draws`) / matches played
+- Ranking: population payoff (`averageScorePerRound`)
 - Match model: Iterated Prisoner's Dilemma (`T=5, R=3, P=1, S=0`)
 
 ## Project Structure
@@ -81,8 +81,8 @@ Then open `http://localhost:5173`.
 
 ## Frontend Features
 
-- Run round-robin tournaments with configurable rounds and optional seed
-- View leaderboard ranked by win rate
+- Run population-style round-robin tournaments (self-play included) with configurable rounds and optional seed
+- View leaderboard ranked by average payoff per round
 - Replay each match round-by-round with move reveal (`Peace`/`Hit`)
 
 ## Strategy Glossary

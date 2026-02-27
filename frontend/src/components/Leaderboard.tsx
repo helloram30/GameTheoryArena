@@ -37,7 +37,7 @@ export default function Leaderboard({ standings }: LeaderboardProps) {
               <tr key={standing.strategy}>
                 <td>{index + 1}</td>
                 <td>
-                  <StrategyName name={standing.strategy} />
+                  <StrategyName name={standing.strategy} placement={index >= standings.length - 3 ? 'top' : 'bottom'} />
                 </td>
                 <td>{fixed(standing.averageScorePerRound)}</td>
                 <td>{pct(standing.winRate)}</td>

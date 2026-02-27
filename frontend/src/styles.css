@@ -68,6 +68,12 @@ p {
   box-shadow: 0 10px 24px rgba(20, 26, 33, 0.08);
   position: relative;
   overflow: visible;
+  z-index: 0;
+}
+
+.panel:hover,
+.panel:focus-within {
+  z-index: 20;
 }
 
 .missionBlurb {
@@ -228,8 +234,6 @@ th {
   gap: 6px;
   position: relative;
   cursor: help;
-  z-index: 1;
-  isolation: isolate;
 }
 
 .strategyLabel {
@@ -252,12 +256,9 @@ th {
 }
 
 .strategyPopover {
-  display: none;
-  position: absolute;
-  left: 0;
-  top: calc(100% + 8px);
+  position: fixed;
   z-index: 2000;
-  width: min(340px, 72vw);
+  width: min(340px, calc(100vw - 24px));
   background-color: #132427;
   color: #f4f6f3;
   border: 1px solid #0d1a1d;
@@ -267,11 +268,16 @@ th {
   line-height: 1.35;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   white-space: normal;
+  opacity: 1;
+  pointer-events: none;
 }
 
-.strategyTooltip:hover .strategyPopover,
-.strategyTooltip:focus-within .strategyPopover {
-  display: block;
+.strategyPopover-top {
+  transform: translateY(-100%);
+}
+
+.strategyPopover-bottom {
+  transform: none;
 }
 
 @media (max-width: 800px) {

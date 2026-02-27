@@ -63,27 +63,33 @@ export default function App() {
           per round. Higher Avg/Round means a strategy is better at sustaining valuable interactions across the field.
         </p>
         <form onSubmit={onSubmit} className="controlGrid">
-          <label htmlFor="rounds">Rounds per match</label>
-          <input
-            id="rounds"
-            type="number"
-            min={1}
-            value={rounds}
-            onChange={(event) => setRounds(Number(event.target.value))}
-          />
+          <div className="controlField">
+            <label htmlFor="rounds">Rounds per match</label>
+            <input
+              id="rounds"
+              type="number"
+              min={1}
+              value={rounds}
+              onChange={(event) => setRounds(Number(event.target.value))}
+            />
+          </div>
 
-          <label htmlFor="seed">Seed (optional)</label>
-          <input
-            id="seed"
-            type="text"
-            placeholder="e.g. 42"
-            value={seed}
-            onChange={(event) => setSeed(event.target.value)}
-          />
+          <div className="controlField">
+            <label htmlFor="seed">Seed (optional)</label>
+            <input
+              id="seed"
+              type="text"
+              placeholder="e.g. 42"
+              value={seed}
+              onChange={(event) => setSeed(event.target.value)}
+            />
+          </div>
 
-          <button type="submit" disabled={loading || strategies.length < 2}>
-            {loading ? 'Running...' : 'Run Arena'}
-          </button>
+          <div className="controlActions">
+            <button type="submit" disabled={loading || strategies.length < 2}>
+              {loading ? 'Running...' : 'Run Arena'}
+            </button>
+          </div>
         </form>
 
         <p className="meta">Strategies loaded: {strategies.length} | Scheduled matches: {totalMatches}</p>

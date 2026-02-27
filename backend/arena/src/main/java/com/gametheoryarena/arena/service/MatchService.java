@@ -43,7 +43,7 @@ public class MatchService {
     }
 
     public TournamentResult playTournament(List<String> requestedStrategies, int rounds, Long seed) {
-        return playTournament(requestedStrategies, rounds, seed, null);
+        return playTournament(requestedStrategies, rounds, seed, null, true);
     }
 
     public TournamentResult playTournament(
@@ -51,6 +51,15 @@ public class MatchService {
             int rounds,
             Long seed,
             List<CustomStrategyRequest> customStrategies) {
+        return playTournament(requestedStrategies, rounds, seed, customStrategies, true);
+    }
+
+    public TournamentResult playTournament(
+            List<String> requestedStrategies,
+            int rounds,
+            Long seed,
+            List<CustomStrategyRequest> customStrategies,
+            boolean includeSelfPlay) {
         if (rounds < 1) {
             throw new IllegalArgumentException("Rounds must be >= 1");
         }
@@ -75,7 +84,8 @@ public class MatchService {
         Random baseRandom = seed == null ? new Random() : new Random(seed);
 
         for (int i = 0; i < strategies.size(); i++) {
-            for (int j = i; j < strategies.size(); j++) {
+            int jStart = includeSelfPlay ? i : i + 1;
+            for (int j = jStart; j < strategies.size(); j++) {
                 String strategyOneName = strategies.get(i);
                 String strategyTwoName = strategies.get(j);
 

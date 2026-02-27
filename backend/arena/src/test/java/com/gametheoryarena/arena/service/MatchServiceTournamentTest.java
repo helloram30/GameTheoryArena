@@ -28,6 +28,16 @@ class MatchServiceTournamentTest {
     }
 
     @Test
+    void canDisableSelfPlayForPairOnlyRuns() {
+        List<String> strategies = List.of("AlwaysDefect", "TitForTat");
+
+        TournamentResult result = matchService.playTournament(strategies, 200, 42L, null, false);
+
+        assertEquals(1, result.matches().size());
+        result.standings().forEach(standing -> assertEquals(1, standing.matchesPlayed()));
+    }
+
+    @Test
     void ranksByAverageScorePerRound() {
         List<String> strategies = List.of("AlwaysDefect", "TitForTat", "GrimTrigger", "WinStayLoseShift", "TitForTwoTats");
 

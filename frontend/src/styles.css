@@ -90,6 +90,10 @@ p {
   gap: 8px;
 }
 
+.controlFieldWide {
+  grid-column: 1 / -1;
+}
+
 .controlActions {
   display: flex;
 }
@@ -114,6 +118,13 @@ p {
   align-items: center;
   gap: 8px;
   font-weight: 600;
+}
+
+.duelGrid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .builderGrid {
@@ -183,6 +194,8 @@ td {
   padding: 10px;
   text-align: left;
   white-space: nowrap;
+  position: relative;
+  overflow: visible;
 }
 
 th {
@@ -216,6 +229,7 @@ th {
   position: relative;
   cursor: help;
   z-index: 1;
+  isolation: isolate;
 }
 
 .strategyLabel {
@@ -242,10 +256,11 @@ th {
   position: absolute;
   left: 0;
   top: calc(100% + 8px);
-  z-index: 50;
+  z-index: 2000;
   width: min(340px, 72vw);
-  background: #132427;
+  background-color: #132427;
   color: #f4f6f3;
+  border: 1px solid #0d1a1d;
   border-radius: 8px;
   padding: 9px 10px;
   font-size: 0.82rem;
@@ -273,6 +288,10 @@ th {
   }
 
   .builderGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .duelGrid {
     grid-template-columns: 1fr;
   }
 

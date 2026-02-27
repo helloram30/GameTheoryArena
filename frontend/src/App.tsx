@@ -10,6 +10,9 @@ export default function App() {
   const [strategies, setStrategies] = useState<string[]>([]);
   const [rounds, setRounds] = useState<number>(DEFAULT_ROUNDS);
   const [seed, setSeed] = useState<string>('');
+  const [runAllStrategies, setRunAllStrategies] = useState(true);
+  const [selectedStrategyOne, setSelectedStrategyOne] = useState('');
+  const [selectedStrategyTwo, setSelectedStrategyTwo] = useState('');
   const [includeCustomStrategy, setIncludeCustomStrategy] = useState(false);
   const [customName, setCustomName] = useState('MyRuleBot');
   const [firstMove, setFirstMove] = useState<FirstMove>('COOPERATE');
@@ -25,12 +28,42 @@ export default function App() {
       .catch((loadError: Error) => setError(loadError.message));
   }, []);
 
+  const normalizedCustomName = customName.trim();
+  const isCustomNameValid = normalizedCustomName.length > 0 && !strategies.includes(normalizedCustomName);
+  const availableStrategyChoices = useMemo(() => {
+    if (includeCustomStrategy && isCustomNameValid) {
+      return [...strategies, normalizedCustomName];
+    }
+    return strategies;
+  }, [strategies, includeCustomStrategy, isCustomNameValid, normalizedCustomName]);
+
+  useEffect(() => {
+    if (availableStrategyChoices.length === 0) {
+      return;
+    }
+    if (!availableStrategyChoices.includes(selectedStrategyOne)) {
+      setSelectedStrategyOne(availableStrategyChoices[0]);
+    }
+    if (!availableStrategyChoices.includes(selectedStrategyTwo)) {
+      const fallback = availableStrategyChoices.length > 1 ? availableStrategyChoices[1] : availableStrategyChoices[0];
+      setSelectedStrategyTwo(fallback);
+    }
+  }, [availableStrategyChoices, selectedStrategyOne, selectedStrategyTwo]);
+
+  const canRun = useMemo(() => {
+    if (runAllStrategies) {
+      return availableStrategyChoices.length >= 2;
+    }
+    return selectedStrategyOne.length > 0 && selectedStrategyTwo.length > 0 && selectedStrategyOne !== selectedStrategyTwo;
+  }, [runAllStrategies, availableStrategyChoices.length, selectedStrategyOne, selectedStrategyTwo]);
+
   const totalMatches = useMemo(() => {
-    const hasValidCustomName = customName.trim().length > 0;
-    const extra = includeCustomStrategy && hasValidCustomName ? 1 : 0;
-    const n = strategies.length + extra;
-    return (n * (n + 1)) / 2;
-  }, [strategies, includeCustomStrategy, customName]);
+    if (runAllStrategies) {
+      const n = availableStrategyChoices.length;
+      return (n * (n + 1)) / 2;
+    }
+    return canRun ? 1 : 0;
+  }, [runAllStrategies, availableStrategyChoices.length, canRun]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,16 +78,15 @@ export default function App() {
 
       let customStrategies: CustomStrategyRequest[] | undefined;
       if (includeCustomStrategy) {
-        const normalizedName = customName.trim();
-        if (normalizedName.length === 0) {
+        if (normalizedCustomName.length === 0) {
           throw new Error('Custom strategy name cannot be blank');
         }
-        if (strategies.includes(normalizedName)) {
-          throw new Error(`Custom strategy name conflicts with built-in strategy: ${normalizedName}`);
+        if (strategies.includes(normalizedCustomName)) {
+          throw new Error(`Custom strategy name conflicts with built-in strategy: ${normalizedCustomName}`);
         }
         customStrategies = [
           {
-            name: normalizedName,
+            name: normalizedCustomName,
             firstMove,
             responseMode,
             forgivenessProbability: Math.max(0, Math.min(1, forgivenessProbability))
@@ -62,7 +94,23 @@ export default function App() {
         ];
       }
 
-      const tournamentResult = await runTournament(rounds, parsedSeed, customStrategies);
+      let selectedStrategies: string[] | undefined;
+      let includeSelfPlay: boolean | undefined;
+      if (!runAllStrategies) {
+        if (!canRun) {
+          throw new Error('Please choose two different strategies for direct play');
+        }
+        selectedStrategies = [selectedStrategyOne, selectedStrategyTwo];
+        includeSelfPlay = false;
+      }
+
+      const tournamentResult = await runTournament(
+        rounds,
+        parsedSeed,
+        customStrategies,
+        selectedStrategies,
+        includeSelfPlay ?? true
+      );
       setResult(tournamentResult);
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : 'Unexpected error';
@@ -113,9 +161,52 @@ export default function App() {
           </div>
 
           <div className="controlActions">
-            <button type="submit" disabled={loading || strategies.length < 2}>
+            <button type="submit" disabled={loading || !canRun}>
               {loading ? 'Running...' : 'Run Arena'}
             </button>
+          </div>
+
+          <div className="controlField controlFieldWide">
+            <label className="toggleRow">
+              <input
+                type="checkbox"
+                checked={runAllStrategies}
+                onChange={(event) => setRunAllStrategies(event.target.checked)}
+              />
+              Run all strategies against all (round-robin)
+            </label>
+            {!runAllStrategies && (
+              <div className="duelGrid">
+                <div className="controlField">
+                  <label htmlFor="duel-one">Strategy A</label>
+                  <select
+                    id="duel-one"
+                    value={selectedStrategyOne}
+                    onChange={(event) => setSelectedStrategyOne(event.target.value)}
+                  >
+                    {availableStrategyChoices.map((strategy) => (
+                      <option key={`duel-a-${strategy}`} value={strategy}>
+                        {strategy}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="controlField">
+                  <label htmlFor="duel-two">Strategy B</label>
+                  <select
+                    id="duel-two"
+                    value={selectedStrategyTwo}
+                    onChange={(event) => setSelectedStrategyTwo(event.target.value)}
+                  >
+                    {availableStrategyChoices.map((strategy) => (
+                      <option key={`duel-b-${strategy}`} value={strategy}>
+                        {strategy}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
         </form>
 
@@ -185,7 +276,10 @@ export default function App() {
           )}
         </div>
 
-        <p className="meta">Strategies loaded: {strategies.length} | Scheduled matches: {totalMatches}</p>
+        <p className="meta">
+          Strategies loaded: {strategies.length} | Scheduled matches: {totalMatches} | Mode:{' '}
+          {runAllStrategies ? 'All-vs-All' : 'Direct Pair'}
+        </p>
       </section>
 
       {error && <p className="error">{error}</p>}

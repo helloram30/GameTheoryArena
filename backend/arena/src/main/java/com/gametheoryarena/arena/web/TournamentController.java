@@ -34,7 +34,8 @@ public class TournamentController {
                     request.strategies(),
                     request.rounds(),
                     request.seed(),
-                    request.customStrategies());
+                    request.customStrategies(),
+                    request.includeSelfPlay() == null || request.includeSelfPlay());
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
         }

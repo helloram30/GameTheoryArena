@@ -9,6 +9,7 @@ public record TournamentRequest(
         List<String> strategies,
         @Min(1) int rounds,
         Long seed,
-        @Valid List<CustomStrategyRequest> customStrategies
+        @Valid List<CustomStrategyRequest> customStrategies,
+        Boolean includeSelfPlay
 ) {
 }

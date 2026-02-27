@@ -13,14 +13,16 @@ export async function fetchStrategies(): Promise<string[]> {
 export async function runTournament(
   rounds: number,
   seed?: number,
-  customStrategies?: CustomStrategyRequest[]
+  customStrategies?: CustomStrategyRequest[],
+  strategies?: string[],
+  includeSelfPlay = true
 ): Promise<TournamentResult> {
   const response = await fetch(`${BASE_URL}/tournament`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ rounds, seed, customStrategies })
+    body: JSON.stringify({ rounds, seed, customStrategies, strategies, includeSelfPlay })
   });
 
   if (!response.ok) {
